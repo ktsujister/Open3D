@@ -65,7 +65,6 @@ TEST(NanoFlannIndex, SearchKnn) {
              std::vector<double>({0.00626358, 0.00747938, 0.0108912}));
     EXPECT_EQ(indices.GetShape(), core::SizeVector({1, 3}));
     EXPECT_EQ(distances.GetShape(), core::SizeVector({1, 3}));
-
     // if k > size
     std::tie(indices, distances) = index.SearchKnn(query, 12);
 

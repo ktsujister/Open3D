@@ -36,8 +36,8 @@ jobs:
       matrix:
         SHARED: [ON, OFF]
         STATIC_RUNTIME: [ON, OFF]
-        BUILD_CUDA: [ON, OFF]
-        CONFIG: [Release, Debug]
+        BUILD_CUDA: [OFF]
+        CONFIG: [Debug]
         exclude:
           - SHARED: ON
             STATIC_RUNTIME: ON
@@ -125,7 +125,7 @@ jobs:
         working-directory: ${{ env.BUILD_DIR }}
         run: |
           echo "Add --gtest_random_seed=SEED to the test command to repeat this test sequence."
-          .\bin\${{ matrix.CONFIG }}\tests.exe --gtest_shuffle --gtest_filter=-*ReduceSum64bit2DCase0*:*ReduceSum64bit2DCase3*
+          .\bin\${{ matrix.CONFIG }}\tests.exe --gtest_shuffle --gtest_filter=*NearesetNeighborSearch*:*NanoFlann*
       - name: Linking to Open3D
         run: |
           $ErrorActionPreference = 'Stop'

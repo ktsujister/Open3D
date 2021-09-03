@@ -127,6 +127,7 @@ void _KnnSearchCPU(NanoFlannIndexHolderBase *holder,
                    bool ignore_query_point,
                    bool return_distances,
                    OUTPUT_ALLOCATOR &output_allocator) {
+    std::cout << "1" << std::endl;
     // return empty indices array if there are no points
     if (num_queries == 0 || num_points == 0 || holder == nullptr) {
         std::fill(query_neighbors_row_splits,
@@ -139,21 +140,29 @@ void _KnnSearchCPU(NanoFlannIndexHolderBase *holder,
         return;
     }
 
+    std::cout << "2" << std::endl;
     auto points_equal = [](const T *const p1, const T *const p2,
                            size_t dimension) {
-        std::vector<T> p1_vec(p1, p1 + dimension);
-        std::vector<T> p2_vec(p2, p2 + dimension);
-        return p1_vec == p2_vec;
+        bool equal = false;
+        for (size_t i = 0; i < dimension; i++) {
+            equal = equal && (p1[i] == p2[i]);
+        }
+        return equal;
+        // std::vector<T> p1_vec(p1, p1 + dimension);
+        // std::vector<T> p2_vec(p2, p2 + dimension);
+        // return p1_vec == p2_vec;
     };
 
     std::vector<std::vector<index_t>> neighbors_indices(num_queries);
     std::vector<std::vector<T>> neighbors_distances(num_queries);
     std::vector<uint32_t> neighbors_count(num_queries, 0);
 
+    std::cout << "3" << std::endl;
     // cast NanoFlannIndexHolder
     auto holder_ =
             static_cast<NanoFlannIndexHolder<METRIC, T, index_t> *>(holder);
 
+    std::cout << "4" << std::endl;
     tbb::parallel_for(
             tbb::blocked_range<size_t>(0, num_queries),
             [&](const tbb::blocked_range<size_t> &r) {
@@ -183,11 +192,13 @@ void _KnnSearchCPU(NanoFlannIndexHolderBase *holder,
                 }
             });
 
+    std::cout << "5" << std::endl;
     query_neighbors_row_splits[0] = 0;
     utility::InclusivePrefixSum(&neighbors_count[0],
-                                &neighbors_count[neighbors_count.size()],
+                                &neighbors_count[neighbors_count.size() - 1],
                                 query_neighbors_row_splits + 1);
 
+    std::cout << "6" << std::endl;
     int64_t num_indices = query_neighbors_row_splits[num_queries];
 
     index_t *indices_ptr;
@@ -198,8 +209,10 @@ void _KnnSearchCPU(NanoFlannIndexHolderBase *holder,
     else
         output_allocator.AllocDistances(&distances_ptr, 0);
 
+    std::cout << "7" << std::endl;
     std::fill(neighbors_count.begin(), neighbors_count.end(), 0);
 
+    std::cout << "8" << std::endl;
     // fill output index and distance arrays
     tbb::parallel_for(tbb::blocked_range<size_t>(0, num_queries),
                       [&](const tbb::blocked_range<size_t> &r) {
@@ -216,6 +229,7 @@ void _KnnSearchCPU(NanoFlannIndexHolderBase *holder,
                               }
                           }
                       });
+    std::cout << "9" << std::endl;
 }
 
 template <class T, class OUTPUT_ALLOCATOR, int METRIC>
